@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GreenFootTetris.iml" filepath="$PROJECT_DIR$/GreenFootTetris.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GreenFootTetris.main.iml" filepath="$PROJECT_DIR$/.idea/modules/GreenFootTetris.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GreenFootTetris.test.iml" filepath="$PROJECT_DIR$/.idea/modules/GreenFootTetris.test.iml" />
     </modules>
   </component>
 </project>
