@@ -1,1 +1,9 @@
+# Project
 .idea
+
+# Compiled Stuff
+*.class
+*.ctxt
+
+# IDK
+*.iml

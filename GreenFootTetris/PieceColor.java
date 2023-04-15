@@ -1,5 +1,9 @@
 public enum PieceColor {
-    RED,
+    AQUA,
     BLUE,
-    GREEN
+    ORANGE,
+    YELLOW,
+    GREEN,
+    PURPLE,
+    RED
 }
