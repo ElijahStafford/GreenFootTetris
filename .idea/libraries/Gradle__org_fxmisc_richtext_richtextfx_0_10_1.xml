@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: org.fxmisc.richtext:richtextfx:0.10.1" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="org.fxmisc.richtext" artifactId="richtextfx" version="0.10.1" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.fxmisc.richtext/richtextfx/0.10.1/d262ec2379572e3a456eabf3e4c6d4725dc66581/richtextfx-0.10.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.fxmisc.richtext/richtextfx/0.10.1/ffaafacb6f79ce0b49e6b2f72131c397112f4996/richtextfx-0.10.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
