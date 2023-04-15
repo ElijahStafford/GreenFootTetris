@@ -1,7 +1,0 @@
-#BlueJ class context
-comment0.target=Vector2
-comment1.params=x\ y
-comment1.target=Vector2(int,\ int)
-comment2.params=x
-comment2.target=Vector2(int)
-numComments=3

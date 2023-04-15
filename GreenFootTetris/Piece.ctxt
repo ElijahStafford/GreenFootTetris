@@ -1,5 +1,0 @@
-#BlueJ class context
-comment0.target=Piece
-comment1.params=color\ hitbox
-comment1.target=Piece(PieceColor,\ Vector2[])
-numComments=2
