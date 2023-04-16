@@ -19,8 +19,8 @@ public class Piece {
     public Piece(PieceColor color) {
         // Initializing variables
         this.color = color;
-        blockOffsets = MyWorld.pieceOffsets.get(color).clone();
-        position = MyWorld.startingPositions.get(color).copy();
+        blockOffsets = PieceShape.pieceOffsets.get(color).clone();
+        position = PieceShape.startingPositions.get(color).copy();
 
         // Initialing shape visuals
         lowestShapeBlocks = new Block[blockOffsets.length / 2];
@@ -44,18 +44,6 @@ public class Piece {
             blocks[i / 2] = block;
             MyWorld.world.addObject(block, block.worldX, block.worldY);
         }
-    }
-
-    public static boolean shapeAvailable(int[] shape) {
-        for (int i = 0; i < shape.length; i += 2) {
-            var x = shape[i];
-            var y = shape[i + 1];
-
-            if (!Block.gridPositionAvailable(x, y))
-                return false;
-        }
-
-        return true;
     }
 
     public int[] gridShape() {
@@ -93,12 +81,21 @@ public class Piece {
         sinceLastMove.mark();
     }
 
+    public int rotation = 0;
+
     public void rotate() {
         rotate(false);
     }
 
     public void rotate(boolean counterClockwise) {
+        if (color == PieceColor.YELLOW) {
+            sinceLastMove.mark();
+            return;
+        }
+
         var newOffsets = blockOffsets.clone();
+        var rotateAmount = counterClockwise ? -90 : 90;
+        var newRotation = (rotation + rotateAmount) % 360;
 
         for (int i = 0; i < blockOffsets.length; i += 2) {
             Vector2 vec = new Vector2(blockOffsets[i], blockOffsets[i + 1]);
@@ -110,9 +107,19 @@ public class Piece {
 
         int[] blockShape = gridShape(newOffsets);
 
-        if (!shapeAvailable(blockShape))
-            return;
+        if (!PieceShape.shapeAvailable(blockShape)) {
+            var kick = WallKick.attemptKick(color, rotation, newRotation, blockShape);
 
+            if (kick.length == 0)
+                return;
+
+            position.x += kick[0];
+            position.y += kick[1];
+
+            blockShape = gridShape(newOffsets);
+        }
+
+        rotation = newRotation;
         blockOffsets = newOffsets;
         updateLowestShape();
         moveToShape(blockShape);
@@ -136,7 +143,7 @@ public class Piece {
 
         var blockShape = gridShape();
 
-        if (shapeAvailable(blockShape)) {
+        if (PieceShape.shapeAvailable(blockShape)) {
             moveToShape(blockShape);
             updateLowestShape();
         }
@@ -150,7 +157,7 @@ public class Piece {
         // Find the lowest shape
         lowestShape = gridShape(blockOffsets);
 
-        boolean canDescend = shapeAvailable(lowestShape);
+        boolean canDescend = PieceShape.shapeAvailable(lowestShape);
 
         while (canDescend) {
             var tempLowestShape = lowestShape.clone();
@@ -159,7 +166,7 @@ public class Piece {
                 tempLowestShape[i + 1]--;
             }
 
-            canDescend = shapeAvailable(tempLowestShape);
+            canDescend = PieceShape.shapeAvailable(tempLowestShape);
 
             if (canDescend)
                 lowestShape = tempLowestShape;

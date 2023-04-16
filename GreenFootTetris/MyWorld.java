@@ -10,10 +10,7 @@ public class MyWorld extends World {
     public static World world;
 
     public static SimpleTimer placeTimer = new SimpleTimer();
-
-    public static HashMap<PieceColor, double[]> pieceOffsets = new HashMap<>();
     public static HashMap<PieceColor, GreenfootImage> images = new HashMap<>();
-    public static HashMap<PieceColor, Vector2> startingPositions = new HashMap<>();
     public static HashMap<Integer, ArrayList<Block>> rows = new HashMap<>();
     public static HashMap<String, KeyWatcher> keys = new HashMap<>();
 
@@ -60,61 +57,6 @@ public class MyWorld extends World {
         worldY -= gridCellSize * y;
 
         return new Vector2(worldX, worldY);
-    }
-
-    private void initializeShapes() {
-        pieceOffsets.put(PieceColor.AQUA, new double[]{
-                -1.5, 0.5,
-                -0.5, 0.5,
-                0.5, 0.5,
-                1.5, 0.5
-        });
-        pieceOffsets.put(PieceColor.BLUE, new double[]{
-                -1, 1,
-                -1, 0,
-                0, 0,
-                1, 0
-        });
-        pieceOffsets.put(PieceColor.ORANGE, new double[]{
-                -1, 0,
-                0, 0,
-                1, 0,
-                1, 1
-        });
-        pieceOffsets.put(PieceColor.YELLOW, new double[]{
-                0.5, 0.5,
-                0.5, -0.5,
-                -0.5, -0.5,
-                -0.5, 0.5
-        });
-        pieceOffsets.put(PieceColor.GREEN, new double[]{
-                -1, 0,
-                0, 0,
-                0, 1,
-                1, 1
-        });
-        pieceOffsets.put(PieceColor.PURPLE, new double[]{
-                -1, 0,
-                0, 0,
-                0, 1,
-                1, 0
-        });
-        pieceOffsets.put(PieceColor.RED, new double[]{
-                -1, 1,
-                0, 1,
-                0, 0,
-                1, 0
-        });
-    }
-
-    private void initializeStartingPositions() {
-        startingPositions.put(PieceColor.AQUA, new Vector2(4.5, 17.5));
-        startingPositions.put(PieceColor.BLUE, new Vector2(4, 18));
-        startingPositions.put(PieceColor.ORANGE, new Vector2(4, 18));
-        startingPositions.put(PieceColor.YELLOW, new Vector2(4.5, 18.5));
-        startingPositions.put(PieceColor.GREEN, new Vector2(4, 18));
-        startingPositions.put(PieceColor.PURPLE, new Vector2(4, 18));
-        startingPositions.put(PieceColor.RED, new Vector2(4, 18));
     }
 
     private void initializeBackground() {
@@ -177,8 +119,9 @@ public class MyWorld extends World {
 
         // System.out.print('\u000C');
 
-        initializeShapes();
-        initializeStartingPositions();
+        PieceShape.registerShapes();
+        PieceShape.registerStartingPositions();
+        WallKick.registerKicks();
         loadImages();
         initializeBackground();
         fillRows();
