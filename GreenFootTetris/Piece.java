@@ -23,6 +23,18 @@ public class Piece {
         }
     }
 
+    public static boolean shapeAvailable(int[] shape) {
+        for (int i = 0; i < shape.length; i += 2) {
+            var x = shape[i];
+            var y = shape[i + 1];
+
+            if (!Block.gridPositionAvailable(x, y))
+                return false;
+        }
+
+        return true;
+    }
+
     public int[] gridShape() {
         return gridShape(shape);
     }
@@ -70,6 +82,26 @@ public class Piece {
 
             Block block = blocks[i / 2];
             block.setLocation(vec.intx(), vec.inty());
+        }
+    }
+
+    public void lower() {
+        position.y--;
+
+        var blockShape = gridShape();
+
+        if (shapeAvailable(blockShape)) {
+            for (int i = 0; i < shape.length; i += 2) {
+                int x = blockShape[i];
+                int y = blockShape[i + 1];
+                var vec = MyWorld.posGridToWorld(x, y);
+
+                Block block = blocks[i / 2];
+                block.setLocation(vec.intx(), vec.inty());
+            }
+        }
+        else {
+            position.y++;
         }
     }
 }

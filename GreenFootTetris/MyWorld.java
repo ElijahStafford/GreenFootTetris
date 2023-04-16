@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import greenfoot.*;
@@ -5,9 +6,12 @@ import greenfoot.*;
 public class MyWorld extends World {
     public static World world;
 
-    public static HashMap<PieceColor, double[]> shapes = new HashMap<PieceColor, double[]>();
-    public static HashMap<PieceColor, GreenfootImage> images = new HashMap<PieceColor, GreenfootImage>();
-    public static HashMap<PieceColor, Vector2> startingPositions = new HashMap<PieceColor, Vector2>();
+    public static SimpleTimer placeTimer = new SimpleTimer();
+
+    public static HashMap<PieceColor, double[]> shapes = new HashMap<>();
+    public static HashMap<PieceColor, GreenfootImage> images = new HashMap<>();
+    public static HashMap<PieceColor, Vector2> startingPositions = new HashMap<>();
+    public static HashMap<Integer, ArrayList<Block>> rows = new HashMap<>();
 
     public static final int worldWidth = 1000;
     public static final int worldHeight = 800;
@@ -114,6 +118,12 @@ public class MyWorld extends World {
         }
     }
 
+    private void fillRows() {
+        for (int i = 0; i < gridHeight; i++) {
+            rows.put(i, new ArrayList<>());
+        }
+    }
+
     public MyWorld() {
         super(worldWidth, worldHeight, 1);
 
@@ -121,16 +131,23 @@ public class MyWorld extends World {
         initializeStartingPositions();
         loadImages();
         initializeBackground();
+        fillRows();
 
         world = this;
         activePiece = new Piece(PieceColor.BLUE);
     }
 
     KeyWatcher upArrow = new KeyWatcher("up");
+    KeyWatcher downArrow = new KeyWatcher("down");
 
     public void act() {
         if (upArrow.check()) {
             activePiece.rotate();
+        }
+
+        if (placeTimer.millisElapsed() > 1000 || downArrow.check()) {
+            activePiece.lower();
+            placeTimer.mark();
         }
     }
 }
