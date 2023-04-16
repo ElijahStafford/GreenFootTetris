@@ -29,6 +29,13 @@ public class MyWorld extends World {
     public static Piece activePiece;
     public static ArrayList<PieceColor> pieceBag = new ArrayList<>();
 
+    public static SimpleTimer deleteTimer = new SimpleTimer();
+    public static int deleteRowAnimationMs = 150;
+    public static int deleteFallAnimationMs = 100;
+    public static int deleteAnimationCrossoverMs = 40;
+    public static HashMap<Integer, ArrayList<Block>> blockOffsetMap = new HashMap<>();
+    public static HashMap<Integer, ArrayList<Block>> deletedRows = new HashMap<>();
+
     public static void nextPiece() {
         if (pieceBag.size() == 0) {
             Collections.addAll(pieceBag, PieceColor.values());
@@ -168,6 +175,8 @@ public class MyWorld extends World {
     public MyWorld() {
         super(worldWidth, worldHeight, 1);
 
+        System.out.print('\u000C');
+
         initializeShapes();
         initializeStartingPositions();
         loadImages();
@@ -181,6 +190,72 @@ public class MyWorld extends World {
 
     public void act() {
         watchKeys();
+
+        if (deletedRows.size() > 0) {
+            int totalMs = deleteRowAnimationMs + deleteFallAnimationMs - deleteAnimationCrossoverMs;
+            int msElapsed = deleteTimer.millisElapsed();
+
+            double gridWeight = 0.5;
+
+            if (msElapsed < deleteRowAnimationMs) {
+                for (var row : deletedRows.values()) {
+                    for (var block : row) {
+                        double gridFraction = gridWeight * block.gridX / gridWidth;
+                        double fraction = (double)msElapsed / deleteRowAnimationMs;
+                        fraction /= 1 + gridWeight;
+                        fraction += gridFraction;
+                        fraction *= 1 + gridWeight;
+                        fraction = Math.min(Math.max(fraction, 0), 1);
+
+                        int size = (int)Math.round(gridCellSize * (1 - fraction));
+                        if (size == 0)
+                            size = 1;
+
+                        var image = block.getImage();
+                        image.setTransparency((int)((1 - fraction) * 255));
+                        image.scale(size, size);
+
+                        block.setRotation((int)Math.round(fraction * 20));
+                    }
+                }
+            }
+
+            var fallingStartMs = deleteRowAnimationMs - deleteAnimationCrossoverMs;
+
+            if (fallingStartMs < msElapsed && msElapsed <= totalMs) {
+                var localElapsed = msElapsed - deleteRowAnimationMs + deleteAnimationCrossoverMs;
+
+                for (var entry : blockOffsetMap.entrySet()) {
+                    var row = entry.getValue();
+                    var offset = entry.getKey();
+
+                    for (var block : row) {
+                        double gridFraction = gridWeight * block.gridX / gridWidth;
+
+                        double fraction = (double)localElapsed / deleteFallAnimationMs;
+                        fraction = 0.8 - fraction;
+                        fraction -= gridFraction;
+                        fraction /= 1 + gridWeight;
+                        fraction = Math.min(Math.max(fraction, 0), 1);
+
+                        var yPos = block.gridY + offset * fraction;
+                        var vec = posGridToWorld(block.gridX, yPos);
+                        block.setLocation(vec.intx(), vec.inty());
+                    }
+                }
+            }
+
+            if (msElapsed > totalMs) {
+                for (var row : deletedRows.values())
+                    removeObjects(row);
+
+                deletedRows.clear();
+                blockOffsetMap.clear();
+                nextPiece();
+            }
+
+            return;
+        }
 
         if (keys.get("up").activated) {
             activePiece.rotate();

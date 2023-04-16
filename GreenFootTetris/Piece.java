@@ -1,6 +1,10 @@
+import greenfoot.Color;
 import greenfoot.GreenfootImage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class Piece {
     PieceColor color;
@@ -182,15 +186,106 @@ public class Piece {
         MyWorld.placeTimer.mark();
         moveToShape(lowestShape);
 
+        var rows = MyWorld.rows;
+
         for (Block block : lowestShapeBlocks) {
             MyWorld.world.removeObject(block);
         }
 
         for (Block block : blocks) {
-            var arr = MyWorld.rows.get(block.gridY);
+            var arr = rows.get(block.gridY);
             arr.add(block);
         }
 
-        MyWorld.nextPiece();
+        // Check for finished rows
+        HashSet<Integer> deletedLayers = new HashSet<>();
+        HashMap<Integer, ArrayList<Block>> deletedRows = new HashMap<>();
+        int offset = 0;
+
+        // Register deleted rows
+        for (int layer : rows.keySet()) {
+            ArrayList<Block> row = (ArrayList<Block>)rows.get(layer).clone();
+
+            if (row.size() == MyWorld.gridWidth) {
+                offset++;
+                deletedRows.put(offset, row);
+                deletedLayers.add(layer);
+
+                for (Block block : row) {
+                    var image = new GreenfootImage(MyWorld.images.get(PieceColor.BLUE));
+                    image.scale(MyWorld.gridCellSize, MyWorld.gridCellSize);
+                    image.setColor(new Color(255, 255, 255));
+                    image.fill();
+                    block.setImage(image);
+                }
+            }
+        }
+
+        if (deletedRows.size() == 0)
+            MyWorld.nextPiece();
+        else {
+            MyWorld.deleteTimer.mark();
+            MyWorld.deletedRows = deletedRows;
+
+            var offsetMap = MyWorld.blockOffsetMap;
+
+            // Register offset values
+            for (var entry : deletedRows.entrySet()) {
+                var layer = entry.getValue().get(0).gridY + 1;
+                var entryOffset = entry.getKey();
+
+                if (layer >= MyWorld.gridHeight)
+                    return;
+
+                var row = (ArrayList<Block>)rows.get(layer).clone();
+                var nothingInRow = row.size() == 0;
+                var rowIsDeleted = deletedLayers.contains(layer);
+
+                while (!rowIsDeleted && !nothingInRow) {
+                    if (!offsetMap.containsKey(entryOffset))
+                        offsetMap.put(entryOffset, row);
+                    else
+                        offsetMap.get(entryOffset).addAll(row);
+
+                    layer++;
+
+                    if (layer >= MyWorld.gridHeight)
+                        return;
+
+                    row = (ArrayList<Block>)rows.get(layer).clone();
+                    nothingInRow = row.size() == 0;
+                    rowIsDeleted = deletedLayers.contains(layer);
+                }
+            }
+
+            // Clear rows
+            int bottomRow = deletedRows.get(1).get(0).gridY;
+
+            System.out.println(bottomRow);
+
+            for (var entry : rows.entrySet()) {
+                var layer = entry.getKey();
+                var row = entry.getValue();
+
+                if (row.size() == 0)
+                    continue;
+
+                if (layer < bottomRow)
+                    continue;
+
+                row.clear();
+            }
+
+            // Repopulate rows
+            for (var entry : offsetMap.entrySet()) {
+                var entryOffset = entry.getKey();
+                var group = entry.getValue();
+
+                for (var block : group) {
+                    block.gridY -= entryOffset;
+                    rows.get(block.gridY).add(block);
+                }
+            }
+        }
     }
 }
