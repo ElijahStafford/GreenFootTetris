@@ -25,12 +25,18 @@ public class Piece {
         // Initialing shape visuals
         lowestShapeBlocks = new Block[blockOffsets.length / 2];
 
+        GreenfootImage image = new GreenfootImage(MyWorld.images.get(color));
+        image.setTransparency(100);
+        image.scale(MyWorld.gridCellSize, MyWorld.gridCellSize);
+
         for (int i = 0; i < lowestShapeBlocks.length; i++) {
             Block block = new Block(color);
+            block.setImage(image);
+
             lowestShapeBlocks[i] = block;
         }
 
-        updateLowestShape();
+        updateLowestShape(true);
 
         // Initializing block position
         int[] blockShape = gridShape();
@@ -154,6 +160,10 @@ public class Piece {
     }
 
     public void updateLowestShape() {
+        updateLowestShape(false);
+    }
+
+    public void updateLowestShape(boolean addCubes) {
         // Find the lowest shape
         lowestShape = gridShape(blockOffsets);
 
@@ -181,11 +191,9 @@ public class Piece {
 
             Block block = lowestShapeBlocks[i / 2];
             block.setGridPosition(x, y);
-            MyWorld.world.addObject(block, block.worldX, block.worldY);
 
-            GreenfootImage image = new GreenfootImage(block.getImage());
-            image.setTransparency(isAtLowestPoint ? 0 : 100);
-            block.setImage(image);
+            if (addCubes)
+                MyWorld.world.addObject(block, block.worldX, block.worldY);
         }
 
         if (isAtLowestPoint)
