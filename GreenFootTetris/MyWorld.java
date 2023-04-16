@@ -25,6 +25,10 @@ public class MyWorld extends World {
 
     public static Piece activePiece;
 
+    public static void nextPiece() {
+        activePiece = new Piece(PieceColor.AQUA);
+    }
+
     public static Vector2 posGridToWorld(double x, double y) {
         // Find corner
         double worldX = worldHalfWidth - gridCellSize * gridWidth / 2.;
@@ -162,7 +166,7 @@ public class MyWorld extends World {
         registerKeys();
 
         world = this;
-        activePiece = new Piece(PieceColor.AQUA);
+        nextPiece();
     }
 
     public void act() {
@@ -183,6 +187,10 @@ public class MyWorld extends World {
         if (placeTimer.millisElapsed() > 1000 || keys.get("down").activated) {
             activePiece.lower();
             placeTimer.mark();
+        }
+
+        if (keys.get("space").isDown) {
+            activePiece.place();
         }
     }
 }

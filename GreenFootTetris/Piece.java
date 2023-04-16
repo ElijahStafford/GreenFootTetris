@@ -8,7 +8,7 @@ public class Piece {
     Vector2 position;
     Block[] blocks;
     public int[] lowestShape;
-    public Block[] lowestShapeVisuals;
+    public Block[] lowestShapeBlocks;
 
     public Piece(PieceColor color) {
         // Initializing variables
@@ -17,11 +17,11 @@ public class Piece {
         position = MyWorld.startingPositions.get(color).copy();
 
         // Initialing shape visuals
-        lowestShapeVisuals = new Block[blockOffsets.length / 2];
+        lowestShapeBlocks = new Block[blockOffsets.length / 2];
 
-        for (int i = 0; i < lowestShapeVisuals.length; i++) {
+        for (int i = 0; i < lowestShapeBlocks.length; i++) {
             Block block = new Block(color);
-            lowestShapeVisuals[i] = block;
+            lowestShapeBlocks[i] = block;
         }
 
         updateLowestShape();
@@ -79,10 +79,9 @@ public class Piece {
         for (int i = 0; i < shape.length; i += 2) {
             int x = shape[i];
             int y = shape[i + 1];
-            var vec = MyWorld.posGridToWorld(x, y);
 
             Block block = blocks[i / 2];
-            block.setLocation(vec.intx(), vec.inty());
+            block.setGridPosition(x, y);
         }
     }
 
@@ -141,7 +140,7 @@ public class Piece {
 
     public void updateLowestShape() {
         // Find the lowest shape
-        var lowestShape = gridShape(blockOffsets);
+        lowestShape = gridShape(blockOffsets);
 
         boolean canDescend = shapeAvailable(lowestShape);
 
@@ -165,7 +164,7 @@ public class Piece {
             int x = lowestShape[i];
             int y = lowestShape[i + 1];
 
-            Block block = lowestShapeVisuals[i / 2];
+            Block block = lowestShapeBlocks[i / 2];
             block.setGridPosition(x, y);
             MyWorld.world.addObject(block, block.worldX, block.worldY);
 
@@ -177,5 +176,21 @@ public class Piece {
 
     public boolean isAtLowestPoint() {
         return Arrays.equals(lowestShape, gridShape());
+    }
+
+    public void place() {
+        MyWorld.placeTimer.mark();
+        moveToShape(lowestShape);
+
+        for (Block block : lowestShapeBlocks) {
+            MyWorld.world.removeObject(block);
+        }
+
+        for (Block block : blocks) {
+            var arr = MyWorld.rows.get(block.gridY);
+            arr.add(block);
+        }
+
+        MyWorld.nextPiece();
     }
 }
