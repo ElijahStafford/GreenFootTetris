@@ -50,9 +50,9 @@ public class Piece {
                 MyWorld.world.addObject(errorBlock, errorBlock.worldX, errorBlock.worldY);
 
                 var image = new GreenfootImage(errorBlock.getImage());
-                var size = MyWorld.gridCellSize + 7;
+                var size = MyWorld.gridCellSize + 10;
                 image.scale(size, size);
-                image.setColor(new Color(255, 0, 0));
+                image.setColor(Color.WHITE);
                 image.fill();
                 errorBlock.setImage(image);
             }

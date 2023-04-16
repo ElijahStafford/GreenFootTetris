@@ -24,6 +24,7 @@ public class MyWorld extends World {
     public static final int gridHeight = 20;
 
     public static Piece activePiece;
+    public static PieceColor heldPiece;
     public static ArrayList<PieceColor> pieceBag = new ArrayList<>();
 
     public static SimpleTimer deleteTimer = new SimpleTimer();
@@ -34,9 +35,8 @@ public class MyWorld extends World {
     public static HashMap<Integer, ArrayList<Block>> deletedRows = new HashMap<>();
 
     public static void nextPiece() {
-        if (pieceBag.size() == 0) {
+        if (pieceBag.isEmpty())
             Collections.addAll(pieceBag, PieceColor.values());
-        }
 
         int index = random.nextInt(pieceBag.size());
         PieceColor color = pieceBag.remove(index);
@@ -114,10 +114,24 @@ public class MyWorld extends World {
         }
     }
 
+    private void resetState() {
+        placeTimer.mark();
+        rows.clear();
+        keys.clear();
+        activePiece = null;
+        heldPiece = null;
+        pieceBag.clear();
+        deleteTimer.mark();
+        blockOffsetMap.clear();
+        deletedRows.clear();
+    }
+
     public MyWorld() {
         super(worldWidth, worldHeight, 1);
 
         // System.out.print('\u000C');
+
+        resetState();
 
         PieceShape.registerShapes();
         PieceShape.registerStartingPositions();
