@@ -12,6 +12,7 @@ public class MyWorld extends World {
     public static HashMap<PieceColor, GreenfootImage> images = new HashMap<>();
     public static HashMap<PieceColor, Vector2> startingPositions = new HashMap<>();
     public static HashMap<Integer, ArrayList<Block>> rows = new HashMap<>();
+    public static HashMap<String, KeyWatcher> keys = new HashMap<>();
 
     public static final int worldWidth = 1000;
     public static final int worldHeight = 800;
@@ -124,6 +125,31 @@ public class MyWorld extends World {
         }
     }
 
+    private void registerKey(String key) {
+        keys.put(key, new KeyWatcher(key));
+    }
+
+    public void registerKey(String key, int spamHoldMs) {
+        keys.put(key, new KeyWatcher(key, spamHoldMs));
+    }
+
+    public void registerKey(String key, int spamHoldMs, int spamRateMs) {
+        keys.put(key, new KeyWatcher(key, spamHoldMs, spamRateMs));
+    }
+
+    private void registerKeys() {
+        registerKey("up", 400, 70);
+        registerKey("down");
+        registerKey("left");
+        registerKey("right");
+    }
+
+    private void watchKeys() {
+        for (KeyWatcher watcher : keys.values()) {
+            watcher.watch();
+        }
+    }
+
     public MyWorld() {
         super(worldWidth, worldHeight, 1);
 
@@ -132,30 +158,28 @@ public class MyWorld extends World {
         loadImages();
         initializeBackground();
         fillRows();
+        registerKeys();
 
         world = this;
-        activePiece = new Piece(PieceColor.BLUE);
+        activePiece = new Piece(PieceColor.AQUA);
     }
 
-    KeyWatcher upArrow = new KeyWatcher("up");
-    KeyWatcher downArrow = new KeyWatcher("down");
-    KeyWatcher leftArrow = new KeyWatcher("left");
-    KeyWatcher rightArrow = new KeyWatcher("right");
-
     public void act() {
-        if (upArrow.check()) {
+        watchKeys();
+
+        if (keys.get("up").activated) {
             activePiece.rotate();
         }
 
-        if (leftArrow.check()) {
+        if (keys.get("left").activated) {
             activePiece.moveLeft();
         }
 
-        if (rightArrow.check()) {
+        if (keys.get("right").activated) {
             activePiece.moveRight();
         }
 
-        if (placeTimer.millisElapsed() > 1000 || downArrow.check()) {
+        if (placeTimer.millisElapsed() > 1000 || keys.get("down").activated) {
             activePiece.lower();
             placeTimer.mark();
         }
