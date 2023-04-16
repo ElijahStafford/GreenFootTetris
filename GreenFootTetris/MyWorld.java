@@ -1,9 +1,12 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Random;
 
 import greenfoot.*;
 
 public class MyWorld extends World {
+    public static Random random = new Random();
     public static World world;
 
     public static SimpleTimer placeTimer = new SimpleTimer();
@@ -24,9 +27,16 @@ public class MyWorld extends World {
     public static final int gridHeight = 20;
 
     public static Piece activePiece;
+    public static ArrayList<PieceColor> pieceBag = new ArrayList<>();
 
     public static void nextPiece() {
-        activePiece = new Piece(PieceColor.AQUA);
+        if (pieceBag.size() == 0) {
+            Collections.addAll(pieceBag, PieceColor.values());
+        }
+
+        int index = random.nextInt(pieceBag.size());
+        PieceColor color = pieceBag.remove(index);
+        activePiece = new Piece(color);
     }
 
     public static Vector2 posGridToWorld(double x, double y) {
