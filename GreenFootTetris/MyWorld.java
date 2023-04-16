@@ -175,7 +175,7 @@ public class MyWorld extends World {
     public MyWorld() {
         super(worldWidth, worldHeight, 1);
 
-        System.out.print('\u000C');
+        // System.out.print('\u000C');
 
         initializeShapes();
         initializeStartingPositions();
@@ -188,72 +188,80 @@ public class MyWorld extends World {
         nextPiece();
     }
 
+    private void animateRows() {
+        int totalMs = deleteRowAnimationMs + deleteFallAnimationMs - deleteAnimationCrossoverMs;
+        int msElapsed = deleteTimer.millisElapsed();
+
+        double gridWeight = 0.5;
+
+        // Animate out deleted rows
+        if (msElapsed < deleteRowAnimationMs) {
+            for (var row : deletedRows.values()) {
+                for (var block : row) {
+                    double gridFraction = gridWeight * block.gridX / gridWidth;
+                    double fraction = (double)msElapsed / deleteRowAnimationMs;
+                    fraction /= 1 + gridWeight;
+                    fraction += gridFraction;
+                    fraction *= 1 + gridWeight;
+                    fraction = Math.min(Math.max(fraction, 0), 1);
+
+                    int size = (int)Math.round(gridCellSize * (1 - fraction));
+                    if (size == 0)
+                        size = 1;
+
+                    var image = block.getImage();
+                    image.setTransparency((int)((1 - fraction) * 255));
+                    image.scale(size, size);
+
+                    block.setRotation((int)Math.round(fraction * 20));
+                }
+            }
+        }
+
+        // Make rows above fall
+        var fallingStartMs = deleteRowAnimationMs - deleteAnimationCrossoverMs;
+
+        if (fallingStartMs < msElapsed && msElapsed <= totalMs) {
+            var localElapsed = msElapsed - deleteRowAnimationMs + deleteAnimationCrossoverMs;
+
+            for (var entry : blockOffsetMap.entrySet()) {
+                var row = entry.getValue();
+                var offset = entry.getKey();
+
+                for (var block : row) {
+                    double gridFraction = gridWeight * block.gridX / gridWidth;
+
+                    double fraction = (double)localElapsed / deleteFallAnimationMs;
+                    fraction = 0.8 - fraction;
+                    fraction -= gridFraction;
+                    fraction /= 1 + gridWeight;
+                    fraction = Math.min(Math.max(fraction, 0), 1);
+
+                    var yPos = block.gridY + offset * fraction;
+                    var vec = posGridToWorld(block.gridX, yPos);
+                    block.setLocation(vec.intx(), vec.inty());
+                }
+            }
+        }
+
+        // Finish
+        if (msElapsed > totalMs) {
+            for (var row : deletedRows.values())
+                removeObjects(row);
+
+            deletedRows.clear();
+            blockOffsetMap.clear();
+            nextPiece();
+        }
+    }
+
+    public int lowerMs = 1000;
+
     public void act() {
         watchKeys();
 
-        if (deletedRows.size() > 0) {
-            int totalMs = deleteRowAnimationMs + deleteFallAnimationMs - deleteAnimationCrossoverMs;
-            int msElapsed = deleteTimer.millisElapsed();
-
-            double gridWeight = 0.5;
-
-            if (msElapsed < deleteRowAnimationMs) {
-                for (var row : deletedRows.values()) {
-                    for (var block : row) {
-                        double gridFraction = gridWeight * block.gridX / gridWidth;
-                        double fraction = (double)msElapsed / deleteRowAnimationMs;
-                        fraction /= 1 + gridWeight;
-                        fraction += gridFraction;
-                        fraction *= 1 + gridWeight;
-                        fraction = Math.min(Math.max(fraction, 0), 1);
-
-                        int size = (int)Math.round(gridCellSize * (1 - fraction));
-                        if (size == 0)
-                            size = 1;
-
-                        var image = block.getImage();
-                        image.setTransparency((int)((1 - fraction) * 255));
-                        image.scale(size, size);
-
-                        block.setRotation((int)Math.round(fraction * 20));
-                    }
-                }
-            }
-
-            var fallingStartMs = deleteRowAnimationMs - deleteAnimationCrossoverMs;
-
-            if (fallingStartMs < msElapsed && msElapsed <= totalMs) {
-                var localElapsed = msElapsed - deleteRowAnimationMs + deleteAnimationCrossoverMs;
-
-                for (var entry : blockOffsetMap.entrySet()) {
-                    var row = entry.getValue();
-                    var offset = entry.getKey();
-
-                    for (var block : row) {
-                        double gridFraction = gridWeight * block.gridX / gridWidth;
-
-                        double fraction = (double)localElapsed / deleteFallAnimationMs;
-                        fraction = 0.8 - fraction;
-                        fraction -= gridFraction;
-                        fraction /= 1 + gridWeight;
-                        fraction = Math.min(Math.max(fraction, 0), 1);
-
-                        var yPos = block.gridY + offset * fraction;
-                        var vec = posGridToWorld(block.gridX, yPos);
-                        block.setLocation(vec.intx(), vec.inty());
-                    }
-                }
-            }
-
-            if (msElapsed > totalMs) {
-                for (var row : deletedRows.values())
-                    removeObjects(row);
-
-                deletedRows.clear();
-                blockOffsetMap.clear();
-                nextPiece();
-            }
-
+        if (!deletedRows.isEmpty()) {
+            animateRows();
             return;
         }
 
@@ -269,12 +277,26 @@ public class MyWorld extends World {
             activePiece.moveRight();
         }
 
-        if (placeTimer.millisElapsed() > 1000 || keys.get("down").activated) {
+        boolean enoughTimeToLower = placeTimer.millisElapsed() > lowerMs;
+        boolean lowestPoint = activePiece.isAtLowestPoint();
+
+        if ((enoughTimeToLower || keys.get("down").activated) && !lowestPoint) {
             activePiece.lower();
             placeTimer.mark();
         }
 
         if (keys.get("space").isDown) {
+            activePiece.place();
+            return;
+        }
+
+        boolean recentlyAtLowest = activePiece.sinceLowestPoint.millisElapsed() < lowerMs * 2;
+        boolean movedRecently = activePiece.sinceLastMove.millisElapsed() < lowerMs;
+        boolean movedTimeUp = placeTimer.millisElapsed() > lowerMs * 4;
+        boolean canLower = enoughTimeToLower && lowestPoint && recentlyAtLowest;
+        boolean moveExtension = movedRecently && !movedTimeUp;
+
+        if (canLower && !moveExtension) {
             activePiece.place();
         }
     }

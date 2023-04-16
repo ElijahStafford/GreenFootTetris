@@ -13,6 +13,8 @@ public class Piece {
     Block[] blocks;
     public int[] lowestShape;
     public Block[] lowestShapeBlocks;
+    public SimpleTimer sinceLowestPoint = new SimpleTimer();
+    public SimpleTimer sinceLastMove = new SimpleTimer();
 
     public Piece(PieceColor color) {
         // Initializing variables
@@ -87,6 +89,8 @@ public class Piece {
             Block block = blocks[i / 2];
             block.setGridPosition(x, y);
         }
+
+        sinceLastMove.mark();
     }
 
     public void rotate() {
@@ -176,6 +180,9 @@ public class Piece {
             image.setTransparency(isAtLowestPoint ? 0 : 100);
             block.setImage(image);
         }
+
+        if (isAtLowestPoint)
+            sinceLowestPoint.mark();
     }
 
     public boolean isAtLowestPoint() {
@@ -204,7 +211,7 @@ public class Piece {
 
         // Register deleted rows
         for (int layer : rows.keySet()) {
-            ArrayList<Block> row = (ArrayList<Block>)rows.get(layer).clone();
+            ArrayList<Block> row = new ArrayList<>(rows.get(layer));
 
             if (row.size() == MyWorld.gridWidth) {
                 offset++;
@@ -221,7 +228,7 @@ public class Piece {
             }
         }
 
-        if (deletedRows.size() == 0)
+        if (deletedRows.isEmpty())
             MyWorld.nextPiece();
         else {
             MyWorld.deleteTimer.mark();
@@ -237,7 +244,7 @@ public class Piece {
                 if (layer >= MyWorld.gridHeight)
                     return;
 
-                var row = (ArrayList<Block>)rows.get(layer).clone();
+                var row = new ArrayList<>(rows.get(layer));
                 var nothingInRow = row.size() == 0;
                 var rowIsDeleted = deletedLayers.contains(layer);
 
@@ -252,7 +259,7 @@ public class Piece {
                     if (layer >= MyWorld.gridHeight)
                         return;
 
-                    row = (ArrayList<Block>)rows.get(layer).clone();
+                    row = new ArrayList<>(rows.get(layer));
                     nothingInRow = row.size() == 0;
                     rowIsDeleted = deletedLayers.contains(layer);
                 }
@@ -261,14 +268,12 @@ public class Piece {
             // Clear rows
             int bottomRow = deletedRows.get(1).get(0).gridY;
 
-            System.out.println(bottomRow);
-
             for (var entry : rows.entrySet()) {
                 var layer = entry.getKey();
                 var row = entry.getValue();
 
                 if (row.size() == 0)
-                    continue;
+                    break;
 
                 if (layer < bottomRow)
                     continue;
