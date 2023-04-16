@@ -63,17 +63,22 @@ public class Piece {
     }
 
     public void rotate(boolean counterClockwise) {
+        var newShape = shape.clone();
+
         for (int i = 0; i < shape.length; i += 2) {
             Vector2 vec = new Vector2(shape[i], shape[i + 1]);
             vec.rotate(counterClockwise ? -90 : 90);
 
-            // here's where I'd check if this is a valid rotation
-
-            shape[i] = vec.x;
-            shape[i + 1] = vec.y;
+            newShape[i] = vec.x;
+            newShape[i + 1] = vec.y;
         }
 
-        int[] blockShape = gridShape();
+        int[] blockShape = gridShape(newShape);
+
+        if (!shapeAvailable(blockShape))
+            return;
+
+        shape = newShape;
 
         for (int i = 0; i < shape.length; i += 2) {
             int x = blockShape[i];
@@ -86,22 +91,36 @@ public class Piece {
     }
 
     public void lower() {
-        position.y--;
+        translate(0, -1);
+    }
+
+    public void moveLeft() {
+        translate(-1, 0);
+    }
+
+    public void moveRight() {
+        translate(1, 0);
+    }
+
+    public void translate(int x, int y) {
+        position.x += x;
+        position.y += y;
 
         var blockShape = gridShape();
 
         if (shapeAvailable(blockShape)) {
             for (int i = 0; i < shape.length; i += 2) {
-                int x = blockShape[i];
-                int y = blockShape[i + 1];
-                var vec = MyWorld.posGridToWorld(x, y);
+                int gridX = blockShape[i];
+                int gridY = blockShape[i + 1];
+                var vec = MyWorld.posGridToWorld(gridX, gridY);
 
                 Block block = blocks[i / 2];
                 block.setLocation(vec.intx(), vec.inty());
             }
         }
         else {
-            position.y++;
+            position.x -= x;
+            position.y -= y;
         }
     }
 }

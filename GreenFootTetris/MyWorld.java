@@ -139,10 +139,20 @@ public class MyWorld extends World {
 
     KeyWatcher upArrow = new KeyWatcher("up");
     KeyWatcher downArrow = new KeyWatcher("down");
+    KeyWatcher leftArrow = new KeyWatcher("left");
+    KeyWatcher rightArrow = new KeyWatcher("right");
 
     public void act() {
         if (upArrow.check()) {
             activePiece.rotate();
+        }
+
+        if (leftArrow.check()) {
+            activePiece.moveLeft();
+        }
+
+        if (rightArrow.check()) {
+            activePiece.moveRight();
         }
 
         if (placeTimer.millisElapsed() > 1000 || downArrow.check()) {
