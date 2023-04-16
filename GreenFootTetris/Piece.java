@@ -276,7 +276,7 @@ public class Piece {
                     return;
 
                 var row = new ArrayList<>(rows.get(layer));
-                var nothingInRow = row.size() == 0;
+                var nothingInRow = row.isEmpty();
                 var rowIsDeleted = deletedLayers.contains(layer);
 
                 while (!rowIsDeleted && !nothingInRow) {
@@ -288,7 +288,7 @@ public class Piece {
                     layer++;
 
                     if (layer >= MyWorld.gridHeight)
-                        return;
+                        break;
 
                     row = new ArrayList<>(rows.get(layer));
                     nothingInRow = row.size() == 0;
@@ -303,8 +303,8 @@ public class Piece {
                 var layer = entry.getKey();
                 var row = entry.getValue();
 
-                if (row.size() == 0)
-                    break;
+                if (row.isEmpty())
+                    continue;
 
                 if (layer < bottomRow)
                     continue;
