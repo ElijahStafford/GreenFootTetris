@@ -3,6 +3,6 @@ public class Block extends Actor
 {
     public Block() {
         setImage("images/block_aqua.png");
-        getImage().scale(10,10);
+        getImage().scale(MyWorld.gridCellSize, MyWorld.gridCellSize);
     }
 }
