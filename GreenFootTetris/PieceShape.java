@@ -55,13 +55,16 @@ public class PieceShape {
     }
 
     public static void registerStartingPositions() {
-        startingPositions.put(PieceColor.AQUA, new Vector2(4.5, 17.5));
-        startingPositions.put(PieceColor.BLUE, new Vector2(4, 18));
-        startingPositions.put(PieceColor.ORANGE, new Vector2(4, 18));
-        startingPositions.put(PieceColor.YELLOW, new Vector2(4.5, 18.5));
-        startingPositions.put(PieceColor.GREEN, new Vector2(4, 18));
-        startingPositions.put(PieceColor.PURPLE, new Vector2(4, 18));
-        startingPositions.put(PieceColor.RED, new Vector2(4, 18));
+        var midPoint = MyWorld.gridWidth / 2;
+        var top = MyWorld.gridHeight;
+
+        startingPositions.put(PieceColor.AQUA, new Vector2(midPoint - 0.5, top - 2.5));
+        startingPositions.put(PieceColor.BLUE, new Vector2(midPoint - 1, top - 2));
+        startingPositions.put(PieceColor.ORANGE, new Vector2(midPoint - 1, top - 2));
+        startingPositions.put(PieceColor.YELLOW, new Vector2(midPoint - 0.5, top - 1.5));
+        startingPositions.put(PieceColor.GREEN, new Vector2(midPoint - 1, top - 2));
+        startingPositions.put(PieceColor.PURPLE, new Vector2(midPoint - 1, top - 2));
+        startingPositions.put(PieceColor.RED, new Vector2(midPoint - 1, top - 2));
     }
 
     public static Vector2 getVisualCenter(PieceColor color) {
