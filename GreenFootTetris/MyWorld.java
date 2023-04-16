@@ -4,6 +4,8 @@ import greenfoot.*;
 
 public class MyWorld extends World {
     public static HashMap<PieceColor, Piece> pieces = new HashMap<PieceColor, Piece>();
+    public static HashMap<PieceColor, GreenfootImage> images = new HashMap<PieceColor, GreenfootImage>();
+
     public static final int worldWidth = 1000;
     public static final int worldHeight = 800;
     public static final int worldHalfWidth = worldWidth / 2;
@@ -29,10 +31,7 @@ public class MyWorld extends World {
         return new Vector2(worldX, worldY);
     }
 
-    public MyWorld() {
-        super(worldWidth, worldHeight, 1);
-
-        // Initialize Pieces
+    private void initializePieces() {
         Piece[] newPieces = {
                 new Piece(PieceColor.AQUA, new double[]{
                         -1.5, 0.5,
@@ -81,6 +80,22 @@ public class MyWorld extends World {
         for (Piece piece : newPieces) {
             pieces.put(piece.color, piece);
         }
+    }
+
+    private void loadImages() {
+        for (var key : PieceColor.values()) {
+            String name = key.name().toLowerCase();
+            String filename = "block_" + name + ".png";
+            GreenfootImage image = new GreenfootImage(filename);
+            images.put(key, image);
+        }
+    }
+
+    public MyWorld() {
+        super(worldWidth, worldHeight, 1);
+
+        initializePieces();
+        loadImages();
 
         // Temp initialize background
         for (int x = 0; x < gridWidth; x++) for (int y = 0; y < gridHeight; y++) {

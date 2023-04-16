@@ -2,7 +2,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class Block extends Actor
 {
     public Block() {
-        setImage("images/block_aqua.png");
+        setImage(MyWorld.images.get(PieceColor.RED));
         getImage().scale(MyWorld.gridCellSize, MyWorld.gridCellSize);
     }
 }
