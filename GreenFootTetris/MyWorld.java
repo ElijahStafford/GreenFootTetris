@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 import greenfoot.*;
 
@@ -24,8 +21,14 @@ public class MyWorld extends World {
     public static final int gridHeight = 20;
 
     public static Piece activePiece;
-    public static PieceColor heldPiece;
     public static ArrayList<PieceColor> pieceBag = new ArrayList<>();
+
+    public static final Vector2 holdBoxPos = new Vector2(-5, gridHeight - 2.5);
+    public static PieceColor heldPieceColor;
+    public static Block[] heldBlocks = new Block[0];
+    public static boolean heldThisTurn = false;
+    public static int holdGridWidth = 4;
+    public static double heldSize = 0.7;
 
     public static SimpleTimer deleteTimer = new SimpleTimer();
     public static int deleteRowAnimationMs = 150;
@@ -34,13 +37,19 @@ public class MyWorld extends World {
     public static HashMap<Integer, ArrayList<Block>> blockOffsetMap = new HashMap<>();
     public static HashMap<Integer, ArrayList<Block>> deletedRows = new HashMap<>();
 
-    public static void nextPiece() {
+    public static PieceColor nextPieceColor() {
         if (pieceBag.isEmpty())
             Collections.addAll(pieceBag, PieceColor.values());
 
         int index = random.nextInt(pieceBag.size());
-        PieceColor color = pieceBag.remove(index);
+        return pieceBag.remove(index);
+    }
+
+    public static void nextPiece() {
+        PieceColor color = nextPieceColor();
         activePiece = new Piece(color);
+        placeTimer.mark();
+        heldThisTurn = false;
     }
 
     public static Vector2 posGridToWorld(double x, double y) {
@@ -69,6 +78,20 @@ public class MyWorld extends World {
                 block.setImage(image);
 
                 addObject(block, block.worldX, block.worldY);
+            }
+        }
+
+        double gridOffset = (holdGridWidth - 1) / 2.;
+
+        for (int x = 0; x < holdGridWidth; x++) {
+            for (int y = 0; y < holdGridWidth; y++) {
+                var vec = new Vector2(x - gridOffset, y - gridOffset);
+                vec.add(holdBoxPos);
+                vec = posGridToWorld(vec.x, vec.y);
+
+                var block = new Block(PieceColor.BLUE);
+                block.setImage(image);
+                addObject(block, vec.intx(), vec.inty());
             }
         }
     }
@@ -106,6 +129,7 @@ public class MyWorld extends World {
         registerKey("left");
         registerKey("right");
         registerKey("space");
+        registerKey("shift");
     }
 
     private void watchKeys() {
@@ -119,11 +143,51 @@ public class MyWorld extends World {
         rows.clear();
         keys.clear();
         activePiece = null;
-        heldPiece = null;
+        heldPieceColor = null;
         pieceBag.clear();
         deleteTimer.mark();
         blockOffsetMap.clear();
         deletedRows.clear();
+        gameEnded = false;
+    }
+
+    public static void hold() {
+        if (heldThisTurn)
+            return;
+
+        PieceColor currentColor = activePiece.color;
+
+        world.removeObjects(List.of(activePiece.lowestShapeBlocks));
+        world.removeObjects(List.of(activePiece.blocks));
+        world.removeObjects(List.of(heldBlocks));
+        placeTimer.mark();
+
+        var shape = PieceShape.pieceOffsets.get(currentColor);
+        var center = PieceShape.getVisualCenter(currentColor);
+
+        heldBlocks = new Block[shape.length / 2];
+
+        int size = (int)Math.round(gridCellSize * heldSize);
+        GreenfootImage image = new GreenfootImage(MyWorld.images.get(currentColor));
+        image.scale(size, size);
+
+        for (int i = 0; i < shape.length; i += 2) {
+            var vec = new Vector2(shape[i], shape[i + 1]);
+            vec.subtract(center);
+            vec.multiply(heldSize);
+            vec.add(holdBoxPos);
+            vec = posGridToWorld(vec.x, vec.y);
+
+            var block = new Block(currentColor);
+            heldBlocks[i / 2] = block;
+            block.setImage(image);
+            world.addObject(block, vec.intx(), vec.inty());
+        }
+
+        var newColor = heldPieceColor == null ? nextPieceColor() : heldPieceColor;
+        activePiece = new Piece(newColor);
+        heldPieceColor = currentColor;
+        heldThisTurn = true;
     }
 
     public MyWorld() {
@@ -133,8 +197,7 @@ public class MyWorld extends World {
 
         resetState();
 
-        PieceShape.registerShapes();
-        PieceShape.registerStartingPositions();
+        PieceShape.registerAll();
         WallKick.registerKicks();
         loadImages();
         initializeBackground();
@@ -142,7 +205,6 @@ public class MyWorld extends World {
         registerKeys();
 
         world = this;
-        gameEnded = false;
         nextPiece();
     }
 
@@ -224,6 +286,10 @@ public class MyWorld extends World {
         if (!deletedRows.isEmpty()) {
             animateRows();
             return;
+        }
+
+        if (keys.get("shift").isDown) {
+            hold();
         }
 
         if (keys.get("up").activated) {

@@ -1,10 +1,7 @@
 import greenfoot.Color;
 import greenfoot.GreenfootImage;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class Piece {
     PieceColor color;
@@ -17,6 +14,7 @@ public class Piece {
     public SimpleTimer sinceLastMove = new SimpleTimer();
 
     public Piece(PieceColor color) {
+
         // Initializing variables
         this.color = color;
         blockOffsets = PieceShape.pieceOffsets.get(color).clone();
@@ -239,9 +237,7 @@ public class Piece {
 
         var rows = MyWorld.rows;
 
-        for (Block block : lowestShapeBlocks) {
-            MyWorld.world.removeObject(block);
-        }
+        MyWorld.world.removeObjects(List.of(lowestShapeBlocks));
 
         for (Block block : blocks) {
             var arr = rows.get(block.gridY);

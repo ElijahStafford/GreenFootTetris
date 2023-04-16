@@ -4,6 +4,11 @@ public class PieceShape {
     public static HashMap<PieceColor, double[]> pieceOffsets = new HashMap<>();
     public static HashMap<PieceColor, Vector2> startingPositions = new HashMap<>();
 
+    public static void registerAll() {
+        registerShapes();
+        registerStartingPositions();
+    }
+
     public static void registerShapes() {
         pieceOffsets.put(PieceColor.AQUA, new double[]{
                 -1.5, 0.5,
@@ -57,6 +62,10 @@ public class PieceShape {
         startingPositions.put(PieceColor.GREEN, new Vector2(4, 18));
         startingPositions.put(PieceColor.PURPLE, new Vector2(4, 18));
         startingPositions.put(PieceColor.RED, new Vector2(4, 18));
+    }
+
+    public static Vector2 getVisualCenter(PieceColor color) {
+        return new Vector2(0, color == PieceColor.YELLOW ? 0 : 0.5);
     }
 
     public static boolean shapeAvailable(int[] shape) {

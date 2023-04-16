@@ -47,4 +47,52 @@ public class Vector2 {
     public Vector2 copy() {
         return new Vector2(x, y);
     }
+
+    public Vector2 add(Vector2 vector) {
+        this.x += vector.x;
+        this.y += vector.y;
+        return this;
+    }
+
+    public Vector2 add(double number) {
+        this.x += number;
+        this.y += number;
+        return this;
+    }
+
+    public Vector2 subtract(Vector2 vector) {
+        this.x -= vector.x;
+        this.y -= vector.y;
+        return this;
+    }
+
+    public Vector2 subtract(double number) {
+        this.x -= number;
+        this.y -= number;
+        return this;
+    }
+
+    public Vector2 multiply(Vector2 vector) {
+        this.x *= vector.x;
+        this.y *= vector.y;
+        return this;
+    }
+
+    public Vector2 multiply(double number) {
+        this.x *= number;
+        this.y *= number;
+        return this;
+    }
+
+    public Vector2 divide(Vector2 vector) {
+        this.x /= vector.x;
+        this.y /= vector.y;
+        return this;
+    }
+
+    public Vector2 divide(double number) {
+        this.x /= number;
+        this.y /= number;
+        return this;
+    }
 }
