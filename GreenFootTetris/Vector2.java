@@ -32,7 +32,7 @@ public class Vector2 {
         angle += Math.toRadians(degrees);
 
         double newX = Math.cos(angle);
-        double newY = Math.sin(angle);
+        double newY = -Math.sin(angle);
         newX *= delta.magnitude();
         newY *= delta.magnitude();
 

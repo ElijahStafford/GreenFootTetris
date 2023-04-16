@@ -94,12 +94,10 @@ public class MyWorld extends World {
     private void initializeBackground() {
         GreenfootImage image = new GreenfootImage("block_neutral.png");
         image.scale(MyWorld.gridCellSize, MyWorld.gridCellSize);
-        image.setColor(new Color(0,0,5));
 
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
                 var pos = posGridToWorld(x, y);
-                // pos.rotate(y, worldHalfWidth, worldHalfHeight);
 
                 var block = new Block(PieceColor.BLUE);
                 block.setImage(image);
@@ -128,10 +126,14 @@ public class MyWorld extends World {
         loadImages();
         initializeBackground();
 
-        activePiece = new Piece(PieceColor.RED);
+        activePiece = new Piece(PieceColor.BLUE);
     }
 
-    public void act() {
+    KeyWatcher upArrow = new KeyWatcher("up");
 
+    public void act() {
+        if (upArrow.check()) {
+            activePiece.rotate();
+        }
     }
 }
