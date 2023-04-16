@@ -16,11 +16,10 @@ public class Piece {
         for (int i = 0; i < shape.length; i += 2) {
             int x = blockShape[i];
             int y = blockShape[i + 1];
-            var vec = MyWorld.posGridToWorld(x, y);
 
-            Block block = new Block(color);
+            Block block = new Block(color, x, y);
             blocks[i / 2] = block;
-            MyWorld.world.addObject(block, vec.intx(), vec.inty());
+            MyWorld.world.addObject(block, block.worldX, block.worldY);
         }
     }
 

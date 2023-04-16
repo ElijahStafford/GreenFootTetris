@@ -97,12 +97,10 @@ public class MyWorld extends World {
 
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
-                var pos = posGridToWorld(x, y);
-
-                var block = new Block(PieceColor.BLUE);
+                var block = new Block(PieceColor.BLUE, x, y);
                 block.setImage(image);
 
-                addObject(block, pos.intx(), pos.inty());
+                addObject(block, block.worldX, block.worldY);
             }
         }
     }
@@ -119,13 +117,12 @@ public class MyWorld extends World {
     public MyWorld() {
         super(worldWidth, worldHeight, 1);
 
-        world = this;
-
         initializeShapes();
         initializeStartingPositions();
         loadImages();
         initializeBackground();
 
+        world = this;
         activePiece = new Piece(PieceColor.BLUE);
     }
 
