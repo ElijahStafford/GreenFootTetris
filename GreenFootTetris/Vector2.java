@@ -10,6 +10,8 @@ public class Vector2 {
         return (int)Math.round(y);
     }
 
+    public Vector2() {}
+
     public Vector2(double x, double y) {
         this.x = x;
         this.y = y;
@@ -40,5 +42,9 @@ public class Vector2 {
 
     public double magnitude() {
         return Math.sqrt(x * x + y * y);
+    }
+
+    public Vector2 copy() {
+        return new Vector2(x, y);
     }
 }

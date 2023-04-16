@@ -3,8 +3,11 @@ import java.util.HashMap;
 import greenfoot.*;
 
 public class MyWorld extends World {
-    public static HashMap<PieceColor, Piece> pieces = new HashMap<PieceColor, Piece>();
+    public static World world;
+
+    public static HashMap<PieceColor, double[]> shapes = new HashMap<PieceColor, double[]>();
     public static HashMap<PieceColor, GreenfootImage> images = new HashMap<PieceColor, GreenfootImage>();
+    public static HashMap<PieceColor, Vector2> startingPositions = new HashMap<PieceColor, Vector2>();
 
     public static final int worldWidth = 1000;
     public static final int worldHeight = 800;
@@ -14,6 +17,8 @@ public class MyWorld extends World {
     public static final int gridCellSize = 30;
     public static final int gridWidth = 10;
     public static final int gridHeight = 20;
+
+    public static Piece activePiece;
 
     public static Vector2 posGridToWorld(double x, double y) {
         // Find corner
@@ -31,54 +36,76 @@ public class MyWorld extends World {
         return new Vector2(worldX, worldY);
     }
 
-    private void initializePieces() {
-        Piece[] newPieces = {
-                new Piece(PieceColor.AQUA, new double[]{
-                        -1.5, 0.5,
-                        -0.5, 0.5,
-                        0.5, 0.5,
-                        1.5, 0.5
-                }),
-                new Piece(PieceColor.BLUE, new double[]{
-                        -1, 1,
-                        -1, 0,
-                        0, 0,
-                        1, 0
-                }),
-                new Piece(PieceColor.ORANGE, new double[]{
-                        -1, 0,
-                        0, 0,
-                        1, 0,
-                        1, 1
-                }),
-                new Piece(PieceColor.YELLOW, new double[]{
-                        0.5, 0.5,
-                        0.5, -0.5,
-                        -0.5, -0.5,
-                        -0.5, 0.5
-                }),
-                new Piece(PieceColor.GREEN, new double[]{
-                        -1, 0,
-                        0, 0,
-                        0, 1,
-                        1, 1
-                }),
-                new Piece(PieceColor.PURPLE, new double[]{
-                        -1, 0,
-                        0, 0,
-                        0, 1,
-                        1, 0
-                }),
-                new Piece(PieceColor.RED, new double[]{
-                        -1, 1,
-                        0, 1,
-                        0, 0,
-                        1, 0
-                }),
-        };
+    private void initializeShapes() {
+        shapes.put(PieceColor.AQUA, new double[]{
+                -1.5, 0.5,
+                -0.5, 0.5,
+                0.5, 0.5,
+                1.5, 0.5
+        });
+        shapes.put(PieceColor.BLUE, new double[]{
+                -1, 1,
+                -1, 0,
+                0, 0,
+                1, 0
+        });
+        shapes.put(PieceColor.ORANGE, new double[]{
+                -1, 0,
+                0, 0,
+                1, 0,
+                1, 1
+        });
+        shapes.put(PieceColor.YELLOW, new double[]{
+                0.5, 0.5,
+                0.5, -0.5,
+                -0.5, -0.5,
+                -0.5, 0.5
+        });
+        shapes.put(PieceColor.GREEN, new double[]{
+                -1, 0,
+                0, 0,
+                0, 1,
+                1, 1
+        });
+        shapes.put(PieceColor.PURPLE, new double[]{
+                -1, 0,
+                0, 0,
+                0, 1,
+                1, 0
+        });
+        shapes.put(PieceColor.RED, new double[]{
+                -1, 1,
+                0, 1,
+                0, 0,
+                1, 0
+        });
+    }
 
-        for (Piece piece : newPieces) {
-            pieces.put(piece.color, piece);
+    private void initializeStartingPositions() {
+        startingPositions.put(PieceColor.AQUA, new Vector2(4.5, 17.5));
+        startingPositions.put(PieceColor.BLUE, new Vector2(4, 18));
+        startingPositions.put(PieceColor.ORANGE, new Vector2(4, 18));
+        startingPositions.put(PieceColor.YELLOW, new Vector2(4.5, 18.5));
+        startingPositions.put(PieceColor.GREEN, new Vector2(4, 18));
+        startingPositions.put(PieceColor.PURPLE, new Vector2(4, 18));
+        startingPositions.put(PieceColor.RED, new Vector2(4, 18));
+    }
+
+    private void initializeBackground() {
+        GreenfootImage image = new GreenfootImage("block_neutral.png");
+        image.scale(MyWorld.gridCellSize, MyWorld.gridCellSize);
+        image.setColor(new Color(0,0,5));
+
+        for (int x = 0; x < gridWidth; x++) {
+            for (int y = 0; y < gridHeight; y++) {
+                var pos = posGridToWorld(x, y);
+                // pos.rotate(y, worldHalfWidth, worldHalfHeight);
+
+                var block = new Block(PieceColor.BLUE);
+                block.setImage(image);
+
+                addObject(block, pos.intx(), pos.inty());
+            }
         }
     }
 
@@ -94,14 +121,17 @@ public class MyWorld extends World {
     public MyWorld() {
         super(worldWidth, worldHeight, 1);
 
-        initializePieces();
-        loadImages();
+        world = this;
 
-        // Temp initialize background
-        for (int x = 0; x < gridWidth; x++) for (int y = 0; y < gridHeight; y++) {
-            var pos = posGridToWorld(x, y);
-            pos.rotate(90, worldHalfWidth, worldHalfHeight);
-            addObject(new Block(), pos.intx(), pos.inty());
-        }
+        initializeShapes();
+        initializeStartingPositions();
+        loadImages();
+        initializeBackground();
+
+        activePiece = new Piece(PieceColor.RED);
+    }
+
+    public void act() {
+
     }
 }
