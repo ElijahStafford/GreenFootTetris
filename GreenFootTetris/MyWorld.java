@@ -52,6 +52,10 @@ public class MyWorld extends World {
         heldThisTurn = false;
     }
 
+    public static Vector2 posGridToWorld(Vector2 vector) {
+        return posGridToWorld(vector.x, vector.y);
+    }
+
     public static Vector2 posGridToWorld(double x, double y) {
         // Find corner
         double worldX = worldHalfWidth - gridCellSize * gridWidth / 2.;
@@ -76,8 +80,6 @@ public class MyWorld extends World {
             for (int y = 0; y < gridHeight; y++) {
                 var block = new Block(PieceColor.BLUE, x, y);
                 block.setImage(image);
-
-                addObject(block, block.worldX, block.worldY);
             }
         }
 
@@ -87,11 +89,9 @@ public class MyWorld extends World {
             for (int y = 0; y < holdGridWidth; y++) {
                 var vec = new Vector2(x - gridOffset, y - gridOffset);
                 vec.add(holdBoxPos);
-                vec = posGridToWorld(vec.x, vec.y);
 
-                var block = new Block(PieceColor.BLUE);
+                var block = new Block(PieceColor.BLUE, vec);
                 block.setImage(image);
-                addObject(block, vec.intx(), vec.inty());
             }
         }
     }
@@ -176,12 +176,10 @@ public class MyWorld extends World {
             vec.subtract(center);
             vec.multiply(heldSize);
             vec.add(holdBoxPos);
-            vec = posGridToWorld(vec.x, vec.y);
 
-            var block = new Block(currentColor);
+            var block = new Block(currentColor, vec);
             heldBlocks[i / 2] = block;
             block.setImage(image);
-            world.addObject(block, vec.intx(), vec.inty());
         }
 
         var newColor = heldPieceColor == null ? nextPieceColor() : heldPieceColor;
@@ -196,6 +194,7 @@ public class MyWorld extends World {
         // System.out.print('\u000C');
 
         resetState();
+        world = this;
 
         PieceShape.registerAll();
         WallKick.registerKicks();
@@ -204,7 +203,6 @@ public class MyWorld extends World {
         fillRows();
         registerKeys();
 
-        world = this;
         nextPiece();
     }
 

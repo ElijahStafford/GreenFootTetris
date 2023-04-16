@@ -14,7 +14,6 @@ public class Piece {
     public SimpleTimer sinceLastMove = new SimpleTimer();
 
     public Piece(PieceColor color) {
-
         // Initializing variables
         this.color = color;
         blockOffsets = PieceShape.pieceOffsets.get(color).clone();
@@ -45,7 +44,6 @@ public class Piece {
 
             if (gameEnded) {
                 Block errorBlock = new Block(color, x, y);
-                MyWorld.world.addObject(errorBlock, errorBlock.worldX, errorBlock.worldY);
 
                 var image = new GreenfootImage(errorBlock.getImage());
                 var size = MyWorld.gridCellSize + 10;
@@ -55,9 +53,6 @@ public class Piece {
                 errorBlock.setImage(image);
             }
         }
-
-        for (Block block : blocks)
-            MyWorld.world.addObject(block, block.worldX, block.worldY);
 
         if (gameEnded)
             return;
@@ -76,7 +71,7 @@ public class Piece {
             lowestShapeBlocks[i] = block;
         }
 
-        updateLowestShape(true);
+        updateLowestShape();
     }
 
     public int[] gridShape() {
@@ -187,10 +182,6 @@ public class Piece {
     }
 
     public void updateLowestShape() {
-        updateLowestShape(false);
-    }
-
-    public void updateLowestShape(boolean addCubes) {
         // Find the lowest shape
         lowestShape = gridShape(blockOffsets);
 
@@ -218,9 +209,6 @@ public class Piece {
 
             Block block = lowestShapeBlocks[i / 2];
             block.setGridPosition(x, y);
-
-            if (addCubes)
-                MyWorld.world.addObject(block, block.worldX, block.worldY);
         }
 
         if (isAtLowestPoint)

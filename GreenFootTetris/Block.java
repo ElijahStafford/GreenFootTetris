@@ -6,7 +6,11 @@ public class Block extends Actor
     int worldX;
     int worldY;
 
-    public Block(PieceColor color, int gridX, int gridY) {
+    public Block(PieceColor color, Vector2 gridPos) {
+        this(color, gridPos.x, gridPos.y);
+    }
+
+    public Block(PieceColor color, double gridX, double gridY) {
         this(color);
         setGridPosition(gridX, gridY);
     }
@@ -15,15 +19,20 @@ public class Block extends Actor
         GreenfootImage image = MyWorld.images.get(color);
         image.scale(MyWorld.gridCellSize, MyWorld.gridCellSize);
         setImage(image);
+        MyWorld.world.addObject(this, 0, 0);
     }
 
-    public void setGridPosition(int x, int y) {
-        gridX = x;
-        gridY = y;
-        Vector2 gridLocation = MyWorld.posGridToWorld(x, y);
+    public void setGridPosition(Vector2 vector) {
+        gridX = vector.intx();
+        gridY = vector.inty();
+        Vector2 gridLocation = MyWorld.posGridToWorld(vector);
         worldX = gridLocation.intx();
         worldY = gridLocation.inty();
         setLocation(worldX, worldY);
+    }
+
+    public void setGridPosition(double x, double y) {
+        setGridPosition(new Vector2(x, y));
     }
 
     public static boolean gridPositionAvailable(int x, int y) {
