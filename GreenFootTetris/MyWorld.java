@@ -100,7 +100,8 @@ public class MyWorld extends World {
         // Temp initialize background
         for (int x = 0; x < gridWidth; x++) for (int y = 0; y < gridHeight; y++) {
             var pos = posGridToWorld(x, y);
-            addObject(new Block(), (int)pos.x, (int)pos.y);
+            pos.rotate(90, worldHalfWidth, worldHalfHeight);
+            addObject(new Block(), pos.intx(), pos.inty());
         }
     }
 }
