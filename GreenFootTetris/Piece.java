@@ -39,7 +39,7 @@ public class Piece {
             int x = blockShape[i];
             int y = blockShape[i + 1];
 
-            Block block = new Block(color, x, y);
+            Block block = new Block(color, x, y, false);
             blocks[i / 2] = block;
 
             if (gameEnded) {
@@ -53,6 +53,9 @@ public class Piece {
                 errorBlock.setImage(image);
             }
         }
+
+        for (Block block : blocks)
+            MyWorld.world.addObject(block, block.worldX, block.worldY);
 
         if (gameEnded)
             return;
