@@ -128,6 +128,7 @@ public class MyWorld extends World {
         registerKeys();
 
         world = this;
+        gameEnded = false;
         nextPiece();
     }
 
@@ -201,6 +202,9 @@ public class MyWorld extends World {
     public int lowerMs = 1000;
 
     public void act() {
+        if (gameEnded)
+            return;
+
         watchKeys();
 
         if (!deletedRows.isEmpty()) {
@@ -242,5 +246,11 @@ public class MyWorld extends World {
         if (canLower && !moveExtension) {
             activePiece.place();
         }
+    }
+
+    public static boolean gameEnded = false;
+
+    public static void endGame() {
+        gameEnded = true;
     }
 }

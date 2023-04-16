@@ -22,6 +22,48 @@ public class Piece {
         blockOffsets = PieceShape.pieceOffsets.get(color).clone();
         position = PieceShape.startingPositions.get(color).copy();
 
+        // Initializing block position
+        int[] blockShape = gridShape();
+        boolean gameEnded = false;
+
+        if (!PieceShape.shapeAvailable(blockShape)) {
+            position.y++;
+            blockShape = gridShape();
+
+            if (!PieceShape.shapeAvailable(blockShape)) {
+                gameEnded = true;
+                MyWorld.endGame();
+            }
+        }
+
+        blocks = new Block[blockOffsets.length / 2];
+
+        for (int i = 0; i < blockOffsets.length; i += 2) {
+            int x = blockShape[i];
+            int y = blockShape[i + 1];
+
+            Block block = new Block(color, x, y);
+            blocks[i / 2] = block;
+
+            if (gameEnded) {
+                Block errorBlock = new Block(color, x, y);
+                MyWorld.world.addObject(errorBlock, errorBlock.worldX, errorBlock.worldY);
+
+                var image = new GreenfootImage(errorBlock.getImage());
+                var size = MyWorld.gridCellSize + 7;
+                image.scale(size, size);
+                image.setColor(new Color(255, 0, 0));
+                image.fill();
+                errorBlock.setImage(image);
+            }
+        }
+
+        for (Block block : blocks)
+            MyWorld.world.addObject(block, block.worldX, block.worldY);
+
+        if (gameEnded)
+            return;
+
         // Initialing shape visuals
         lowestShapeBlocks = new Block[blockOffsets.length / 2];
 
@@ -37,19 +79,6 @@ public class Piece {
         }
 
         updateLowestShape(true);
-
-        // Initializing block position
-        int[] blockShape = gridShape();
-        blocks = new Block[blockOffsets.length / 2];
-
-        for (int i = 0; i < blockOffsets.length; i += 2) {
-            int x = blockShape[i];
-            int y = blockShape[i + 1];
-
-            Block block = new Block(color, x, y);
-            blocks[i / 2] = block;
-            MyWorld.world.addObject(block, block.worldX, block.worldY);
-        }
     }
 
     public int[] gridShape() {
