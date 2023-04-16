@@ -8,7 +8,7 @@ public class MyWorld extends World {
 
     public static SimpleTimer placeTimer = new SimpleTimer();
 
-    public static HashMap<PieceColor, double[]> shapes = new HashMap<>();
+    public static HashMap<PieceColor, double[]> pieceOffsets = new HashMap<>();
     public static HashMap<PieceColor, GreenfootImage> images = new HashMap<>();
     public static HashMap<PieceColor, Vector2> startingPositions = new HashMap<>();
     public static HashMap<Integer, ArrayList<Block>> rows = new HashMap<>();
@@ -42,43 +42,43 @@ public class MyWorld extends World {
     }
 
     private void initializeShapes() {
-        shapes.put(PieceColor.AQUA, new double[]{
+        pieceOffsets.put(PieceColor.AQUA, new double[]{
                 -1.5, 0.5,
                 -0.5, 0.5,
                 0.5, 0.5,
                 1.5, 0.5
         });
-        shapes.put(PieceColor.BLUE, new double[]{
+        pieceOffsets.put(PieceColor.BLUE, new double[]{
                 -1, 1,
                 -1, 0,
                 0, 0,
                 1, 0
         });
-        shapes.put(PieceColor.ORANGE, new double[]{
+        pieceOffsets.put(PieceColor.ORANGE, new double[]{
                 -1, 0,
                 0, 0,
                 1, 0,
                 1, 1
         });
-        shapes.put(PieceColor.YELLOW, new double[]{
+        pieceOffsets.put(PieceColor.YELLOW, new double[]{
                 0.5, 0.5,
                 0.5, -0.5,
                 -0.5, -0.5,
                 -0.5, 0.5
         });
-        shapes.put(PieceColor.GREEN, new double[]{
+        pieceOffsets.put(PieceColor.GREEN, new double[]{
                 -1, 0,
                 0, 0,
                 0, 1,
                 1, 1
         });
-        shapes.put(PieceColor.PURPLE, new double[]{
+        pieceOffsets.put(PieceColor.PURPLE, new double[]{
                 -1, 0,
                 0, 0,
                 0, 1,
                 1, 0
         });
-        shapes.put(PieceColor.RED, new double[]{
+        pieceOffsets.put(PieceColor.RED, new double[]{
                 -1, 1,
                 0, 1,
                 0, 0,
@@ -142,6 +142,7 @@ public class MyWorld extends World {
         registerKey("down");
         registerKey("left");
         registerKey("right");
+        registerKey("space");
     }
 
     private void watchKeys() {

@@ -1,19 +1,36 @@
+import greenfoot.GreenfootImage;
+
+import java.util.Arrays;
+
 public class Piece {
     PieceColor color;
-    double[] shape;
+    double[] blockOffsets;
     Vector2 position;
     Block[] blocks;
+    public int[] lowestShape;
+    public Block[] lowestShapeVisuals;
 
     public Piece(PieceColor color) {
+        // Initializing variables
         this.color = color;
-
-        shape = MyWorld.shapes.get(color).clone();
+        blockOffsets = MyWorld.pieceOffsets.get(color).clone();
         position = MyWorld.startingPositions.get(color).copy();
 
-        int[] blockShape = gridShape();
-        blocks = new Block[shape.length / 2];
+        // Initialing shape visuals
+        lowestShapeVisuals = new Block[blockOffsets.length / 2];
 
-        for (int i = 0; i < shape.length; i += 2) {
+        for (int i = 0; i < lowestShapeVisuals.length; i++) {
+            Block block = new Block(color);
+            lowestShapeVisuals[i] = block;
+        }
+
+        updateLowestShape();
+
+        // Initializing block position
+        int[] blockShape = gridShape();
+        blocks = new Block[blockOffsets.length / 2];
+
+        for (int i = 0; i < blockOffsets.length; i += 2) {
             int x = blockShape[i];
             int y = blockShape[i + 1];
 
@@ -36,7 +53,7 @@ public class Piece {
     }
 
     public int[] gridShape() {
-        return gridShape(shape);
+        return gridShape(blockOffsets);
     }
 
     /**
@@ -58,36 +75,40 @@ public class Piece {
         return result;
     }
 
-    public void rotate() {
-        rotate(false);
-    }
-
-    public void rotate(boolean counterClockwise) {
-        var newShape = shape.clone();
-
+    public void moveToShape(int[] shape) {
         for (int i = 0; i < shape.length; i += 2) {
-            Vector2 vec = new Vector2(shape[i], shape[i + 1]);
-            vec.rotate(counterClockwise ? -90 : 90);
-
-            newShape[i] = vec.x;
-            newShape[i + 1] = vec.y;
-        }
-
-        int[] blockShape = gridShape(newShape);
-
-        if (!shapeAvailable(blockShape))
-            return;
-
-        shape = newShape;
-
-        for (int i = 0; i < shape.length; i += 2) {
-            int x = blockShape[i];
-            int y = blockShape[i + 1];
+            int x = shape[i];
+            int y = shape[i + 1];
             var vec = MyWorld.posGridToWorld(x, y);
 
             Block block = blocks[i / 2];
             block.setLocation(vec.intx(), vec.inty());
         }
+    }
+
+    public void rotate() {
+        rotate(false);
+    }
+
+    public void rotate(boolean counterClockwise) {
+        var newOffsets = blockOffsets.clone();
+
+        for (int i = 0; i < blockOffsets.length; i += 2) {
+            Vector2 vec = new Vector2(blockOffsets[i], blockOffsets[i + 1]);
+            vec.rotate(counterClockwise ? -90 : 90);
+
+            newOffsets[i] = vec.x;
+            newOffsets[i + 1] = vec.y;
+        }
+
+        int[] blockShape = gridShape(newOffsets);
+
+        if (!shapeAvailable(blockShape))
+            return;
+
+        blockOffsets = newOffsets;
+        updateLowestShape();
+        moveToShape(blockShape);
     }
 
     public void lower() {
@@ -109,18 +130,52 @@ public class Piece {
         var blockShape = gridShape();
 
         if (shapeAvailable(blockShape)) {
-            for (int i = 0; i < shape.length; i += 2) {
-                int gridX = blockShape[i];
-                int gridY = blockShape[i + 1];
-                var vec = MyWorld.posGridToWorld(gridX, gridY);
-
-                Block block = blocks[i / 2];
-                block.setLocation(vec.intx(), vec.inty());
-            }
+            moveToShape(blockShape);
+            updateLowestShape();
         }
         else {
             position.x -= x;
             position.y -= y;
         }
+    }
+
+    public void updateLowestShape() {
+        // Find the lowest shape
+        var lowestShape = gridShape(blockOffsets);
+
+        boolean canDescend = shapeAvailable(lowestShape);
+
+        while (canDescend) {
+            var tempLowestShape = lowestShape.clone();
+
+            for (int i = 0; i < blockOffsets.length; i += 2) {
+                tempLowestShape[i + 1]--;
+            }
+
+            canDescend = shapeAvailable(tempLowestShape);
+
+            if (canDescend)
+                lowestShape = tempLowestShape;
+        }
+
+        // Update visuals
+        boolean isAtLowestPoint = isAtLowestPoint();
+
+        for (int i = 0; i < lowestShape.length; i += 2) {
+            int x = lowestShape[i];
+            int y = lowestShape[i + 1];
+
+            Block block = lowestShapeVisuals[i / 2];
+            block.setGridPosition(x, y);
+            MyWorld.world.addObject(block, block.worldX, block.worldY);
+
+            GreenfootImage image = new GreenfootImage(block.getImage());
+            image.setTransparency(isAtLowestPoint ? 0 : 100);
+            block.setImage(image);
+        }
+    }
+
+    public boolean isAtLowestPoint() {
+        return Arrays.equals(lowestShape, gridShape());
     }
 }
