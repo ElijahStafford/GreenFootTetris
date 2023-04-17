@@ -7,6 +7,7 @@ public class MyWorld extends World {
     public static World world;
 
     public static SimpleTimer placeTimer = new SimpleTimer();
+    public static SimpleTimer lowerTimer = new SimpleTimer();
     public static HashMap<PieceColor, GreenfootImage> images = new HashMap<>();
     public static HashMap<Integer, ArrayList<Block>> rows = new HashMap<>();
     public static HashMap<String, KeyWatcher> keys = new HashMap<>();
@@ -49,6 +50,7 @@ public class MyWorld extends World {
         PieceColor color = nextPieceColor();
         activePiece = new Piece(color);
         placeTimer.mark();
+        lowerTimer.mark();
         heldThisTurn = false;
     }
 
@@ -302,24 +304,27 @@ public class MyWorld extends World {
             activePiece.moveRight();
         }
 
-        boolean enoughTimeToLower = placeTimer.millisElapsed() > lowerMs;
+        boolean enoughTimeToLower = lowerTimer.millisElapsed() > lowerMs;
         boolean lowestPoint = activePiece.isAtLowestPoint();
+
+        boolean recentlyAtLowest = activePiece.sinceLowestPoint.millisElapsed() < lowerMs * 2 && activePiece.beenAtLowest;
+        boolean movedRecently = activePiece.sinceLastMove.millisElapsed() < lowerMs;
+        boolean movedTimeUp = placeTimer.millisElapsed() > lowerMs * 4;
+        boolean canLower = placeTimer.millisElapsed() > lowerMs && lowestPoint && recentlyAtLowest;
+        boolean moveExtension = movedRecently && !movedTimeUp;
 
         if ((enoughTimeToLower || keys.get("down").activated) && !lowestPoint) {
             activePiece.lower();
-            placeTimer.mark();
+            lowerTimer.mark();
+
+            if (!recentlyAtLowest)
+                placeTimer.mark();
         }
 
         if (keys.get("space").isDown) {
             activePiece.place();
             return;
         }
-
-        boolean recentlyAtLowest = activePiece.sinceLowestPoint.millisElapsed() < lowerMs * 2;
-        boolean movedRecently = activePiece.sinceLastMove.millisElapsed() < lowerMs;
-        boolean movedTimeUp = placeTimer.millisElapsed() > lowerMs * 4;
-        boolean canLower = enoughTimeToLower && lowestPoint && recentlyAtLowest;
-        boolean moveExtension = movedRecently && !movedTimeUp;
 
         if (canLower && !moveExtension) {
             activePiece.place();

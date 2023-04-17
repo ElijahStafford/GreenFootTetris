@@ -12,6 +12,7 @@ public class Piece {
     public Block[] lowestShapeBlocks;
     public SimpleTimer sinceLowestPoint = new SimpleTimer();
     public SimpleTimer sinceLastMove = new SimpleTimer();
+    public boolean beenAtLowest = false;
 
     public Piece(PieceColor color) {
         // Initializing variables
@@ -214,8 +215,10 @@ public class Piece {
             block.setGridPosition(x, y);
         }
 
-        if (isAtLowestPoint)
+        if (isAtLowestPoint) {
             sinceLowestPoint.mark();
+            beenAtLowest = true;
+        }
     }
 
     public boolean isAtLowestPoint() {
@@ -224,6 +227,7 @@ public class Piece {
 
     public void place() {
         MyWorld.placeTimer.mark();
+        MyWorld.lowerTimer.mark();
         moveToShape(lowestShape);
 
         var rows = MyWorld.rows;
